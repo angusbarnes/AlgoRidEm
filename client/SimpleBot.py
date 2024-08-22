@@ -1,13 +1,20 @@
 from typing import List
-from server.game_engine import GameState
+from common.game_entities import GameState
 from common.actions import *
 
 class Bot:
-    def __init__(self, nation_name, starting_territories):
-        self.name = nation_name
-        self.territories = starting_territories
-        self.troops = sum(territory.troops for territory in starting_territories)
-        self.resources = sum(territory.resources for territory in starting_territories)
+
+    # IF you have never seen type hints before, "bot_id: int | str" simply means the variable 'bot_id'
+    # will either be a int or string type
+    def __init__(self, bot_id: int | str):
+        # you can use this init function to set up any instance variables you want your bot to "remember".
+        # If you want to support bot variations, you can also put parameters in the init function, but these
+        # must have a default value
+
+        # All bots are assigned a unique ID by the server. You should remember yours because it will be
+        # needed later in order to get a list of owned territories
+        self.ID = bot_id
+        pass
 
     def play_turn(self, game_state: GameState, turn_number: int) -> ActionRequest | List[ActionRequest]:
         """
@@ -37,20 +44,28 @@ class Bot:
         if target_territory:
             self.attack(target_territory)
 
-        def defend_territory(self, game_state: GameState, territory_under_attack: Territory) -> ActionRequest:
-            """
-            In marginal cases, the game server may allow players to take a defensive action when attacked.
-            The specifics of this will not be explained. If this function is called, the player may make ONE
-            defensive action. THIS CANNOT INCLUDE MOVING TROOPS INTO AN ENEMY TERRITORY (however moving troops
-            between player controlled territories is fine). This could be used to retreat (and protect troops),
-            reinforce (add troops from neighbouring territory) or recruit new troops here (using territories).
+    def defend_territory(self, game_state: GameState, territory_under_attack: Territory) -> ActionRequest:
+        """
+        In marginal cases, the game server may allow players to take a defensive action when attacked.
+        The specifics of this will not be explained. If this function is called, the player may make ONE
+        defensive action. THIS CANNOT INCLUDE MOVING TROOPS INTO AN ENEMY TERRITORY (however moving troops
+        between player controlled territories is fine). This could be used to retreat (and protect troops),
+        reinforce (add troops from neighbouring territory) or recruit new troops here (using territories).
 
-            When necessary, the server will execute actions as follows:
-                --> Server finds a conflict with marginal status (no clear winner)
-                --> Server will call defend_territory on the attacked territory
-                --> Server will execute coresponding action request
-                --> Server will re-evaluate conflict to find winner
-            """
+        When necessary, the server will execute actions as follows:
+            --> Server finds a conflict with marginal status (no clear winner)
+            --> Server will call defend_territory on the attacked territory
+            --> Server will execute coresponding action request
+            --> Server will re-evaluate conflict to find winner
+
+        Args:
+            game_state: A GameState object representing the current game state, think of this like a representation
+                        of the playing board
+            territory_under_attack: This is a quick reference to the territory being attacked for convenience,
+                                    you can use this to easily create an action which defends the attacked territory
+        """
+
+        return DEFAULT_PASS_ACTION
 
     def find_weakest_neighbor(self, game_state: GameState):
         weakest_neighbor = None

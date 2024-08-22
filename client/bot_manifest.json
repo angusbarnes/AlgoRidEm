@@ -1,0 +1,6 @@
+{
+    "bot_name": "YOUR BOT NAME",
+    "bot_id": "A UUID FROM https://www.uuidgenerator.net/",
+    "bot_description": "A brief description of bot strategy or philosophy.",
+    "bot_author": "Developers Name Here"
+}
