@@ -1,9 +1,9 @@
 import pygame
 import sys
-
+from common.game_entities import GameState, Territory
 # Initialize Pygame
 pygame.init()
-
+state = GameState(10)
 # Set up the display
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -17,27 +17,17 @@ BLUE = (0, 0, 255)
 
 # Font
 font = pygame.font.Font(None, 24)
+    
+def draw_territory(surface, territory: Territory):
+    color = RED if territory.owner_id == "Player 1" else BLUE
+    pygame.draw.rect(surface, color, pygame.Rect(territory.x * 60, territory.y * 60, 60, 60))
+    pygame.draw.rect(surface, WHITE, pygame.Rect(territory.x * 60, territory.y * 60, 60, 60), 2)
+    text_surface = font.render(f"{territory.resources}", True, WHITE)
+    screen.blit(text_surface, (territory.x * 60 + 2, territory.y * 60 + 2))
 
-class Territory:
-    def __init__(self, x, y, width, height, owner, troops):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.owner = owner
-        self.troops = troops
+def is_mouse_over_territory(territory: Territory, pos):
+    return pygame.Rect(territory.x * 60, territory.y * 60, 60, 60).collidepoint(pos)
 
-    def draw(self, surface):
-        color = RED if self.owner == "Player 1" else BLUE
-        pygame.draw.rect(surface, color, self.rect)
-        pygame.draw.rect(surface, WHITE, self.rect, 2)
-
-    def is_mouse_over(self, pos):
-        return self.rect.collidepoint(pos)
-
-# Create some example territories
-territories = [
-    Territory(100, 100, 100, 100, "Player 1", 10),
-    Territory(250, 100, 100, 100, "Player 2", 15),
-    Territory(400, 100, 100, 100, "Player 1", 5),
-]
 
 # Main game loop
 running = True
@@ -52,17 +42,21 @@ while running:
     screen.fill(BLACK)
 
     # Draw territories
-    for territory in territories:
-        territory.draw(screen)
+    for territory in state.get_territories():
+        draw_territory(screen, territory)
 
     # Check for mouse hover
     mouse_pos = pygame.mouse.get_pos()
-    for territory in territories:
-        if territory.is_mouse_over(mouse_pos):
+    for territory in state.get_territories():
+        if is_mouse_over_territory(territory, mouse_pos):
             # Display territory info
-            info_text = f"Owner: {territory.owner}, Troops: {territory.troops}"
+            info_text = f"Owner: {territory.owner_id}, Resources: {territory.resources}, Position: ({territory.x}, {territory.y})"
             text_surface = font.render(info_text, True, WHITE)
             screen.blit(text_surface, (10, HEIGHT - 30))
+
+            for neighbor in territory.neighbors:
+                text_surface = font.render("N", True, RED)
+                screen.blit(text_surface, (neighbor.x * 60 + 30, neighbor.y * 60 + 30))
 
     # Update the display
     pygame.display.flip()
